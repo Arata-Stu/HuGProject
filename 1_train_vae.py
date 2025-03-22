@@ -3,10 +3,11 @@ from omegaconf import DictConfig, OmegaConf
 import os
 import torch
 import torch.optim as optim
-from torch.utils.data import DataLoader
-from torchvision import datasets, transforms
 from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
+
 from src.models.vae import CNN_VAE
+from src.data.dataset import get_dataloader  
 
 class CheckpointManager:
     """
@@ -63,27 +64,19 @@ def main(cfg: DictConfig):
     model = CNN_VAE(cnn_cfg, latent_dim, input_shape).to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
-    # CIFAR10 の画像は元々 32x32 なので、設定ファイルの input_shape に合わせてリサイズ
-    resize_dims = (input_shape[1], input_shape[2])  # H x W
-    # 前処理として、リサイズ後にランダム水平反転、ランダム回転などを追加
-    transform = transforms.Compose([
-        transforms.Resize(resize_dims),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(10),
-        transforms.ToTensor(),
-        # 例: transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
-    train_dataset = datasets.CIFAR10(root='./data', train=True, download=True, transform=transform)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    # 学習データローダーと評価（検証）データローダーを取得（dataset.py で split を指定できるように実装しておく）
+    train_loader = get_dataloader(cfg, split="train")
+    val_loader = get_dataloader(cfg, split="val")
 
-    # CheckpointManager と TensorBoard の初期化（パラメータ情報を含むディレクトリ）
+    # CheckpointManager と TensorBoard の初期化
     checkpoint_manager = CheckpointManager(checkpoint_dir, cfg.checkpoint.topk)
     writer = SummaryWriter(log_dir=log_dir)
 
     def train_epoch(model, train_loader, optimizer, device, epoch):
         model.train()
         train_loss = 0
-        for batch_idx, (data, _) in enumerate(train_loader):
+        pbar = tqdm(enumerate(train_loader), total=len(train_loader), desc=f"Epoch {epoch} [Train]")
+        for batch_idx, data in pbar:
             data = data.to(device)
             optimizer.zero_grad()
             recon, mu, logvar = model(data)
@@ -91,18 +84,32 @@ def main(cfg: DictConfig):
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
-
-            if batch_idx % 100 == 0:
-                print(f"Epoch {epoch} Batch {batch_idx}: Loss = {loss.item():.4f}")
-
+            pbar.set_postfix(loss=f"{loss.item():.4f}")
         avg_loss = train_loss / len(train_loader.dataset)
-        print(f"====> Epoch {epoch} Average loss: {avg_loss:.4f}")
+        print(f"====> Epoch {epoch} Train Average loss: {avg_loss:.4f}")
         return avg_loss
 
+    def evaluate_epoch(model, val_loader, device, epoch):
+        model.eval()
+        val_loss = 0
+        with torch.no_grad():
+            pbar = tqdm(enumerate(val_loader), total=len(val_loader), desc=f"Epoch {epoch} [Val]")
+            for batch_idx, data in pbar:
+                data = data.to(device)
+                recon, mu, logvar = model(data)
+                loss, bce, kl = model.vae_loss(recon, data, mu, logvar)
+                val_loss += loss.item()
+                pbar.set_postfix(loss=f"{loss.item():.4f}")
+        avg_val_loss = val_loss / len(val_loader.dataset)
+        print(f"====> Epoch {epoch} Validation Average loss: {avg_val_loss:.4f}")
+        return avg_val_loss
+
     for epoch in range(1, num_epochs + 1):
-        avg_loss = train_epoch(model, train_loader, optimizer, device, epoch)
-        writer.add_scalar("Loss/train", avg_loss, epoch)
-        checkpoint_manager.update(epoch, avg_loss, model)
+        avg_train_loss = train_epoch(model, train_loader, optimizer, device, epoch)
+        avg_val_loss = evaluate_epoch(model, val_loader, device, epoch)
+        writer.add_scalar("Loss/train", avg_train_loss, epoch)
+        writer.add_scalar("Loss/val", avg_val_loss, epoch)
+        checkpoint_manager.update(epoch, avg_train_loss, model)
 
     writer.close()
 

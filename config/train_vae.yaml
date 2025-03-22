@@ -9,6 +9,10 @@ batch_size: 64
 num_epochs: 300
 input_shape: ${vae.input_shape}
 
+dataset:
+  name: "coco"    # "coco" または "cifar10" を指定
+  root: "./data/coco"  # coco の画像ディレクトリ
+  
 checkpoint:
   base_dir: "./checkpoints"
   topk: 3
