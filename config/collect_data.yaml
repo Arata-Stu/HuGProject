@@ -5,3 +5,5 @@ env:
   num_steps: 1000
   width: 64
   height: 64
+
+output_dir: ./dataset
