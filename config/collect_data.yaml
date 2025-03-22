@@ -1,10 +1,10 @@
 env:
   name: CarRacing-v3
   render_mode : human
-  num_episodes: 10
-  num_steps: 1000
   width: 64
   height: 64
 
+num_episodes: 10
+num_steps: 1000
 output_dir: ./dataset
 mode: manual # manual or random
