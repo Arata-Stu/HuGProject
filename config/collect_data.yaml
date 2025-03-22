@@ -7,3 +7,4 @@ env:
   height: 64
 
 output_dir: ./dataset
+mode: manual # manual or random
