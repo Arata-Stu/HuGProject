@@ -1,0 +1,45 @@
+env:
+  name: CarRacing-v3
+  render_mode : human ## human or rgb_array
+  num_steps: 1000
+  width: 64
+  height: 64
+
+vae:
+  latent_dim: 64
+  input_shape: [3, 64, 64]
+  cnn:
+    ckpt_path: null
+
+agent: 
+  gamma: 0.99
+  tau: 0.005
+  policy_noise: 0.2
+  noise_clip: 0.5
+  policy_delay: 2
+  n_step: 3
+
+  actor: 
+    actor_lr: 3e-4
+    hidden_dim: 256
+  
+  critic:
+    critic_lr: 3e-4
+    hidden_dim: 256
+
+buffer:
+  size: 1e6
+  n_step: ${agent.n_step}
+  gamma: ${agent.gamma}
+
+max_episodes: 100
+max_steps: 1000
+batch_size: 128
+save_ckpt_dir: ./ckpts
+
+reconstructed_log_interval: 50
+eval_interval: 10
+num_eval_episodes: 1
+record_video: True
+
+
