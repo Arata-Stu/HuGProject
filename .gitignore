@@ -3,6 +3,7 @@ datasets/
 check_potints
 ckpts/
 logs/
+outputs/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
