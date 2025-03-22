@@ -1,5 +1,7 @@
 hydra-core
 omegaconf
+tqdm
 numpy
 torch
 torchvision
+tensorboard
