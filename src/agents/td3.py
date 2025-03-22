@@ -50,10 +50,18 @@ class TD3Agent:
         self._hard_update(self.actor_target, self.actor)
         self._hard_update(self.critic_target, self.critic)
 
-    def select_action(self, state: torch.Tensor) -> np.ndarray:
+    def select_action(self, state_z: torch.Tensor, state_vec: torch.Tensor):
+        """
+        TD3のアクション選択
+        - `evaluate=True` の場合、確定的なアクション（探索なし）
+        - `evaluate=False` の場合、ノイズを加えて探索
+        """
+
+        state = torch.cat([state_z, state_vec], dim=-1).to(self.device)
         with torch.no_grad():
-            action = self.actor(state.to(self.device))
-        return action.cpu().numpy()
+            action = self.actor(state)
+        action = action.cpu().numpy()[0]
+        return action
 
     def update(self, replay_buffer, batch_size: int = 64):
         self.total_it += 1
