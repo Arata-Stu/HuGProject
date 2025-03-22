@@ -37,7 +37,7 @@ class CheckpointManager:
                 os.remove(worst_path)
                 print(f"Removed old checkpoint: {worst_path}")
 
-@hydra.main(config_path="config", config_name="train_vae")
+@hydra.main(config_path="config", config_name="train_vae", version_base="1.2")
 def main(cfg: DictConfig):
     print("Loaded config:")
     print(OmegaConf.to_yaml(cfg))

@@ -130,7 +130,7 @@ class Trainer:
                 if len(top_models) < 3:
                     top_models.append((episode, episode_reward))
                     model_path = f"{self.save_ckpt_dir}/best_{episode_reward:.2f}_ep_{episode}.pt"
-                    self.agent.save(model_path, episode)
+                    self.agent.save(model_path)
                 else:
                     # 現在のトップモデルの中で最小の報酬を取得
                     min_model = min(top_models, key=lambda x: x[1])
@@ -148,7 +148,7 @@ class Trainer:
                         # 新しいモデルを追加
                         top_models.append((episode, episode_reward))
                         new_model_path = f"{self.save_ckpt_dir}/best_{episode_reward:.2f}_ep_{episode}.pt"
-                        self.agent.save(new_model_path, episode)
+                        self.agent.save(new_model_path)
                 print(f"Episode {episode}: Reward = {episode_reward:.2f}")
 
                 # 評価フェーズの実施
