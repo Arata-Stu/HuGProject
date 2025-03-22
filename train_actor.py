@@ -28,7 +28,7 @@ class Trainer:
         env_cfg = config.env
         env = gym.make(env_cfg.name, render_mode=env_cfg.render_mode)
         env = TimeLimit(env, max_episode_steps=env_cfg.num_steps)
-        env = CarRacingWithInfoWrapper(env=env, width=env_cfg.width, height=env_cfg.height)
+        self.env = CarRacingWithInfoWrapper(env=env, width=env_cfg.width, height=env_cfg.height)
 
         # エージェントの初期化
         
