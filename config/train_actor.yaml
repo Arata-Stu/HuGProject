@@ -37,4 +37,9 @@ eval_interval: 10
 num_eval_episodes: 1
 record_video: True
 
+hydra:
+  run:
+    dir: ./outputs/train_actor/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+
 
