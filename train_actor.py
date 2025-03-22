@@ -85,7 +85,7 @@ class Trainer:
 
                     with Timer("Agent Action"):
                         state_vec = torch.tensor(obs_vec, dtype=torch.float32).unsqueeze(0).to(self.device)
-                        action = self.agent.select_action(state_z=state, state_vec=state_vec, evaluate=False)
+                        action = self.agent.select_action(state_z=state, state_vec=state_vec)
                     self.writer.add_histogram("Actor/Action/Distribution", action, episode)
 
                     with Timer("Environment Step"):
@@ -188,7 +188,7 @@ class Trainer:
                 with Timer("Eval: Agent Action"):
                     obs_vec = obs["vehicle"]
                     state_vec = torch.tensor(obs_vec, dtype=torch.float32).unsqueeze(0).to(self.device)
-                    action = self.agent.select_action(state_z=state, state_vec=state_vec, evaluate=True)
+                    action = self.agent.select_action(state_z=state, state_vec=state_vec)
                 with Timer("Eval: Environment Step"):
                     next_obs, reward, terminated, truncated, info = self.env.step(action)
                 episode_reward += reward
