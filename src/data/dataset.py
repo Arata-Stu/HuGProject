@@ -69,5 +69,5 @@ def get_dataloader(cfg, split="train"):
     else:
         raise ValueError(f"Unsupported dataset: {cfg.dataset.name}")
 
-    dataloader = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=(split == "train"))
+    dataloader = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=(split == "train"), num_workers=cfg.num_workers)
     return dataloader
