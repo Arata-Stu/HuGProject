@@ -20,3 +20,7 @@ checkpoint:
 
 tensorboard:
   log_dir: "./logs/VAE/"
+
+hydra:
+  run:
+    dir: ./outputs/train_vae/${now:%Y-%m-%d}/${now:%H-%M-%S}

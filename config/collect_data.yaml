@@ -9,3 +9,7 @@ num_episodes: 10
 num_steps: 1000
 output_dir: ./dataset
 mode: manual # manual or random
+
+hydra:
+  run:
+    dir: ./outputs/collect_data/${now:%Y-%m-%d}/${now:%H-%M-%S}
